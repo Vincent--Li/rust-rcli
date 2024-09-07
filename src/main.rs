@@ -1,6 +1,7 @@
-// rcli csv --input input.csv --output output.json --header -d '.'
 use clap::Parser;
+// rcli csv --input input.csv --output output.json --header -d '.'
 use csv::Reader;
+use rcli::{Opts, SubCommand};
 use serde::{Deserialize, Serialize};
 use anyhow;
 use serde_json;
@@ -19,30 +20,7 @@ struct Player {
     kit: u8,
 }
 
-#[derive(Debug, Parser)]
-#[command(name="rcli", version, author)]
-struct Opts {
-    #[command(subcommand)]
-    cmd: SubCommand,
-}
 
-#[derive(Debug, Parser)]
-enum SubCommand {
-    #[command(name="csv", about = "Convert CSV to JSON")]
-    Csv(CsvOpts)
-}
-
-#[derive(Debug, Parser)]
-struct CsvOpts {
-    #[arg(short, long, value_parser = verify_input_file)]
-    input: String,
-    #[arg(short, long, default_value = "output.json")]
-    output: String,
-    #[arg(long, default_value_t = false)]
-    header: bool,
-    #[arg(short, long, default_value_t = ',')]
-    delimiter: char,
-}
 
 fn main() -> anyhow::Result<()>{
     let opts = Opts::parse();
@@ -67,9 +45,4 @@ fn main() -> anyhow::Result<()>{
     Ok(())
 }
 
-fn verify_input_file(filename: &str) -> Result<String, String> {
-    match std::fs::metadata(filename) {
-        Ok(_) => Ok(filename.to_string()),
-        Err(_) => Err(format!("Invalid input file: {}", filename))
-    }
-}
+
