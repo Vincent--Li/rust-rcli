@@ -1,9 +1,12 @@
+use std::fs;
+
 use clap::Parser;
 
 // rcli csv --input input.csv --output output.json --header -d '.'
 use rcli::{
-    process_csv, process_decode, process_encode, process_genpass, Base64SubCommand, Opts,
-    SubCommand,
+    process_csv, process_decode, process_encode, process_generate, process_genpass,
+    process_text_sign, process_text_verify, Base64SubCommand, Opts, SubCommand, TextSignFormat,
+    TextSubCommand,
 };
 
 fn main() -> anyhow::Result<()> {
@@ -31,11 +34,36 @@ fn main() -> anyhow::Result<()> {
         SubCommand::Base64(subcmd) => match subcmd {
             Base64SubCommand::Encode(opts) => {
                 println!("{:?}", opts);
-                process_encode(&opts.input, opts.format)?;
+                let encoded = process_encode(&opts.input, opts.format)?;
+                println!("{}", encoded);
             }
             Base64SubCommand::Decode(opts) => {
                 println!("{:?}", opts);
-                process_decode(&opts.input, opts.format)?;
+                let decoded = process_decode(&opts.input, opts.format)?;
+                println!("{}", String::from_utf8(decoded)?);
+            }
+        },
+        SubCommand::Text(subcmd) => match subcmd {
+            TextSubCommand::Sign(opts) => {
+                let sign = process_text_sign(&opts.input, &opts.key, opts.format)?;
+                println!("{}", sign);
+            }
+            TextSubCommand::Verify(opts) => {
+                process_text_verify(&opts.input, &opts.key, opts.format, &opts.sig)?;
+            }
+            TextSubCommand::Generate(opts) => {
+                let spk = process_generate(opts.format)?;
+                match opts.format {
+                    TextSignFormat::Blake3 => {
+                        let name = opts.output.join("blake3.txt");
+                        fs::write(name, &spk[0])?;
+                    }
+                    TextSignFormat::Ed25519 => {
+                        let name = &opts.output;
+                        fs::write(name.join("ed25519.sk"), &spk[0])?;
+                        fs::write(name.join("ed25519.pk"), &spk[1])?;
+                    }
+                };
             }
         },
     }
