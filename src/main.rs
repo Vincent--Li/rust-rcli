@@ -9,7 +9,8 @@ use rcli::{
     Opts, SubCommand, TextSignFormat, TextSubCommand,
 };
 
-fn main() -> anyhow::Result<()> {
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
     let opts = Opts::parse();
     tracing_subscriber::fmt::init();
     match opts.cmd {
@@ -68,7 +69,7 @@ fn main() -> anyhow::Result<()> {
         },
         SubCommand::Http(subcmd) => match subcmd {
             HttpSubCommand::Serve(opts) => {
-                process_http_serve(&opts.dir, opts.port)?;
+                process_http_serve(opts.dir, opts.port).await?;
             }
         },
     }
