@@ -5,13 +5,13 @@ use clap::Parser;
 // rcli csv --input input.csv --output output.json --header -d '.'
 use rcli::{
     process_csv, process_decode, process_encode, process_generate, process_genpass,
-    process_text_sign, process_text_verify, Base64SubCommand, Opts, SubCommand, TextSignFormat,
-    TextSubCommand,
+    process_text_sign, process_text_verify, Base64SubCommand, HttpSubCommand, Opts, SubCommand,
+    TextSignFormat, TextSubCommand,
 };
 
 fn main() -> anyhow::Result<()> {
     let opts = Opts::parse();
-
+    tracing_subscriber::fmt::init();
     match opts.cmd {
         SubCommand::Csv(opts) => {
             let output = if let Some(output) = opts.output {
@@ -64,6 +64,11 @@ fn main() -> anyhow::Result<()> {
                         fs::write(name.join("ed25519.pk"), &spk[1])?;
                     }
                 };
+            }
+        },
+        SubCommand::Http(subcmd) => match subcmd {
+            HttpSubCommand::Serve(opts) => {
+                println!("{:?}", opts);
             }
         },
     }
