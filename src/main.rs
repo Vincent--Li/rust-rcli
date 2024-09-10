@@ -5,8 +5,8 @@ use clap::Parser;
 // rcli csv --input input.csv --output output.json --header -d '.'
 use rcli::{
     process_csv, process_decode, process_encode, process_generate, process_genpass,
-    process_text_sign, process_text_verify, Base64SubCommand, HttpSubCommand, Opts, SubCommand,
-    TextSignFormat, TextSubCommand,
+    process_http_serve, process_text_sign, process_text_verify, Base64SubCommand, HttpSubCommand,
+    Opts, SubCommand, TextSignFormat, TextSubCommand,
 };
 
 fn main() -> anyhow::Result<()> {
@@ -68,7 +68,7 @@ fn main() -> anyhow::Result<()> {
         },
         SubCommand::Http(subcmd) => match subcmd {
             HttpSubCommand::Serve(opts) => {
-                println!("{:?}", opts);
+                process_http_serve(&opts.dir, opts.port)?;
             }
         },
     }
