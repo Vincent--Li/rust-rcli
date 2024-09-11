@@ -40,6 +40,7 @@ async fn file_handler(
     if !p.exists() {
         (StatusCode::NOT_FOUND, "404 Not Found".to_string())
     } else {
+        // TODO: test p is a directory, then return an html which list all the items in the directory with hyper link
         match tokio::fs::read_to_string(p).await {
             Ok(content) => (StatusCode::OK, content),
             Err(_) => (
