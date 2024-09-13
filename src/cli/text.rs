@@ -1,5 +1,7 @@
 use std::{fmt::Display, path::PathBuf, str::FromStr};
 
+use crate::{process_generate, process_text_sign, process_text_verify, CmdExecutor};
+
 use super::{verify_file, verify_path};
 use clap::Parser;
 
@@ -47,6 +49,25 @@ pub struct TextKeyGenerateOpts {
 pub enum TextSignFormat {
     Blake3,
     Ed25519,
+}
+
+impl CmdExecutor for TextSubCommand {
+    async fn execute(self) -> anyhow::Result<()> {
+        match self {
+            TextSubCommand::Sign(opts) => {
+                _ = process_text_sign(&opts.input, &opts.key, opts.format);
+                Ok(())
+            }
+            TextSubCommand::Verify(opts) => {
+                _ = process_text_verify(&opts.input, &opts.key, opts.format, &opts.sig);
+                Ok(())
+            }
+            TextSubCommand::Generate(opts) => {
+                _ = process_generate(opts.format);
+                Ok(())
+            }
+        }
+    }
 }
 
 fn parse_format(s: &str) -> Result<TextSignFormat, anyhow::Error> {

@@ -1,5 +1,7 @@
 use clap::Parser;
 
+use crate::{process_genpass, CmdExecutor};
+
 #[derive(Debug, Parser)]
 pub struct GenPassOpts {
     // length, uppercase, lowercase, number, symbol
@@ -13,4 +15,17 @@ pub struct GenPassOpts {
     pub number: bool,
     #[arg(long, default_value_t = true)]
     pub symbol: bool,
+}
+
+impl CmdExecutor for GenPassOpts {
+    async fn execute(self) -> anyhow::Result<()> {
+        _ = process_genpass(
+            self.uppercase,
+            self.lowercase,
+            self.number,
+            self.symbol,
+            self.length,
+        );
+        Ok(())
+    }
 }

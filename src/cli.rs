@@ -15,6 +15,8 @@ pub use text::*;
 
 use clap::Parser;
 
+use crate::CmdExecutor;
+
 #[derive(Debug, Parser)]
 #[command(name = "rcli", version, author)]
 pub struct Opts {
@@ -34,6 +36,18 @@ pub enum SubCommand {
     Text(TextSubCommand),
     #[command(subcommand, name = "http", about = "HTTP client")]
     Http(HttpSubCommand),
+}
+
+impl CmdExecutor for SubCommand {
+    async fn execute(self) -> anyhow::Result<()> {
+        match self {
+            SubCommand::Csv(cmd) => cmd.execute().await,
+            SubCommand::GenPass(cmd) => cmd.execute().await,
+            SubCommand::Base64(cmd) => cmd.execute().await,
+            SubCommand::Text(cmd) => cmd.execute().await,
+            SubCommand::Http(cmd) => cmd.execute().await,
+        }
+    }
 }
 
 fn verify_file(filename: &str) -> Result<String, String> {

@@ -1,5 +1,7 @@
 use std::str::FromStr;
 
+use crate::{process_decode, process_encode, CmdExecutor};
+
 use super::verify_file;
 use clap::Parser;
 
@@ -31,6 +33,21 @@ pub struct Base64DecodeOpts {
 pub enum Base64Format {
     Standard,
     UrlSafe,
+}
+
+impl CmdExecutor for Base64SubCommand {
+    async fn execute(self) -> anyhow::Result<()> {
+        match self {
+            Base64SubCommand::Encode(opts) => {
+                _ = process_encode(&opts.input, opts.format);
+                Ok(())
+            }
+            Base64SubCommand::Decode(opts) => {
+                _ = process_decode(&opts.input, opts.format);
+                Ok(())
+            }
+        }
+    }
 }
 
 fn parse_base64_format(s: &str) -> Result<Base64Format, anyhow::Error> {

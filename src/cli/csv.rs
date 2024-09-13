@@ -1,5 +1,7 @@
 use std::{fmt::Display, str::FromStr};
 
+use crate::{process_csv, CmdExecutor};
+
 use super::verify_file;
 use clap::Parser;
 
@@ -22,6 +24,12 @@ pub struct CsvOpts {
     pub delimiter: char,
     #[arg(long, default_value = "json", value_parser = parse_format)]
     pub format: OutputFormat,
+}
+
+impl CmdExecutor for CsvOpts {
+    async fn execute(self) -> anyhow::Result<()> {
+        process_csv(&self.input, self.output.unwrap(), self.format)
+    }
 }
 
 fn parse_format(format: &str) -> anyhow::Result<OutputFormat> {
