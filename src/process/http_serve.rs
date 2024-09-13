@@ -28,6 +28,7 @@ pub async fn process_http_serve(path: PathBuf, port: u16) -> Result<()> {
 
     let listener = TcpListener::bind(addr).await?;
     axum::serve(listener, router).await?;
+
     Ok(())
 }
 
