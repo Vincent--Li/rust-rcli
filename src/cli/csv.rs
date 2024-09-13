@@ -28,7 +28,13 @@ pub struct CsvOpts {
 
 impl CmdExecutor for CsvOpts {
     async fn execute(self) -> anyhow::Result<()> {
-        process_csv(&self.input, self.output.unwrap(), self.format)
+        let output = if let Some(output) = self.output {
+            output
+        } else {
+            format!("output.{}", self.format)
+        };
+        process_csv(&self.input, output, self.format)?;
+        Ok(())
     }
 }
 

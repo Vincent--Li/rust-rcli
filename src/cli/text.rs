@@ -1,11 +1,13 @@
-use std::{fmt::Display, path::PathBuf, str::FromStr};
+use std::{fmt::Display, fs, path::PathBuf, str::FromStr};
 
 use crate::{process_generate, process_text_sign, process_text_verify, CmdExecutor};
 
 use super::{verify_file, verify_path};
 use clap::Parser;
+use enum_dispatch::enum_dispatch;
 
 #[derive(Debug, Parser)]
+#[enum_dispatch(CmdExecutor)]
 pub enum TextSubCommand {
     #[command(about = "Sign a message with a private key")]
     Sign(TextSignOpts),
@@ -51,22 +53,36 @@ pub enum TextSignFormat {
     Ed25519,
 }
 
-impl CmdExecutor for TextSubCommand {
+impl CmdExecutor for TextSignOpts {
     async fn execute(self) -> anyhow::Result<()> {
-        match self {
-            TextSubCommand::Sign(opts) => {
-                _ = process_text_sign(&opts.input, &opts.key, opts.format);
-                Ok(())
+        let sign = process_text_sign(&self.input, &self.key, self.format)?;
+        println!("{}", sign);
+        Ok(())
+    }
+}
+
+impl CmdExecutor for TextVerifyOpts {
+    async fn execute(self) -> anyhow::Result<()> {
+        process_text_verify(&self.input, &self.key, self.format, &self.sig)?;
+        Ok(())
+    }
+}
+
+impl CmdExecutor for TextKeyGenerateOpts {
+    async fn execute(self) -> anyhow::Result<()> {
+        let spk = process_generate(self.format)?;
+        match self.format {
+            TextSignFormat::Blake3 => {
+                let name = self.output.join("blake3.txt");
+                fs::write(name, &spk[0])?;
             }
-            TextSubCommand::Verify(opts) => {
-                _ = process_text_verify(&opts.input, &opts.key, opts.format, &opts.sig);
-                Ok(())
+            TextSignFormat::Ed25519 => {
+                let name = &self.output;
+                fs::write(name.join("ed25519.sk"), &spk[0])?;
+                fs::write(name.join("ed25519.pk"), &spk[1])?;
             }
-            TextSubCommand::Generate(opts) => {
-                _ = process_generate(opts.format);
-                Ok(())
-            }
-        }
+        };
+        Ok(())
     }
 }
 

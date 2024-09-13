@@ -19,13 +19,14 @@ pub struct GenPassOpts {
 
 impl CmdExecutor for GenPassOpts {
     async fn execute(self) -> anyhow::Result<()> {
-        _ = process_genpass(
+        println!("{:?}", self);
+        process_genpass(
             self.uppercase,
             self.lowercase,
             self.number,
             self.symbol,
             self.length,
-        );
+        )?;
         Ok(())
     }
 }
